@@ -1,14 +1,12 @@
-@extends('layouts.pembeli')
+<?php $__env->startSection('title', 'Dashboard'); ?>
+<?php $__env->startSection('page-title', 'Dashboard'); ?>
 
-@section('title', 'Dashboard')
-@section('page-title', 'Dashboard')
-
-    @section('head-scripts')
+    <?php $__env->startSection('head-scripts'); ?>
     <script src="https://app.sandbox.midtrans.com/snap/snap.js"
-            data-client-key="{{ config('services.midtrans.client_key') }}"></script>
-    @endsection
+            data-client-key="<?php echo e(config('services.midtrans.client_key')); ?>"></script>
+    <?php $__env->stopSection(); ?>
 
-@section('extra-css')
+<?php $__env->startSection('extra-css'); ?>
 
         html { scroll-behavior: smooth; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FBF9E4; } /* Pearl Perfect */
@@ -44,15 +42,15 @@
             animation: fadeUp 0.4s ease forwards;
         }
     
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="no-scrollbar">
         <header class="flex justify-between items-center mb-10">
             <div class="flex items-center gap-4">
-                <img src="{{ asset('images/logo-foodtyu.png') }}" class="w-10 h-10 object-contain shadow-sm rounded-lg bg-white p-1">
+                <img src="<?php echo e(asset('images/logo-foodtyu.png')); ?>" class="w-10 h-10 object-contain shadow-sm rounded-lg bg-white p-1">
                 <div>
-                    <h2 class="text-3xl font-black text-[#122C4F]">Hi, {{ Auth::user()->name }}! 👋</h2>
+                    <h2 class="text-3xl font-black text-[#122C4F]">Hi, <?php echo e(Auth::user()->name); ?>! 👋</h2>
                     <p class="text-slate-500 font-medium text-sm">Laper ngerjain tugas? Pesan makan yuk!</p>
                 </div>
             </div>
@@ -60,23 +58,23 @@
 
         <section class="bg-gradient-to-r from-[#5B88B2] to-[#122C4F] rounded-[45px] p-12 text-white flex justify-between items-center mb-12 shadow-xl relative overflow-hidden group">
             <div class="relative z-10 max-w-md">
-                @if(Auth::user()->role === 'mahasiswa')
-                    {{-- Banner Khusus Mahasiswa --}}
+                <?php if(Auth::user()->role === 'mahasiswa'): ?>
+                    
                     <span class="bg-[#FBF9E4] text-[#122C4F] px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">🎓 Promo Student</span>
                     <h3 class="text-4xl font-black mt-5 mb-3 italic tracking-tighter text-[#FBF9E4]">Diskon Acak Hari Ini!</h3>
                     <p class="text-lg opacity-90 font-medium leading-relaxed mb-6">Khusus buat kamu mahasiswa Tel-U yang lagi ngerjain tugas. Ambil voucher terbaik dan hemat belanja di kantin.</p>
                     <button onclick="openVoucherModal()" class="bg-green-400 hover:bg-green-500 text-gray-900 px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg">
                         VOUCHER TERPASANG ✓
                     </button>
-                @else
-                    {{-- Banner untuk User Biasa --}}
+                <?php else: ?>
+                    
                     <span class="bg-[#FBF9E4] text-[#122C4F] px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">👤 User Member</span>
                     <h3 class="text-4xl font-black mt-5 mb-3 italic tracking-tighter text-[#FBF9E4]">Selamat Datang!</h3>
                     <p class="text-lg opacity-90 font-medium leading-relaxed mb-6">Nikmati hidangan lezat kantin Tel-U dengan pemesanan praktis tanpa antre. Cepat, mudah, dan terjangkau.</p>
                     <button onclick="scrollToMenu()" class="bg-blue-400 hover:bg-blue-500 text-gray-900 px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg">
                         LIHAT MENU SEKARANG →
                     </button>
-                @endif
+                <?php endif; ?>
             </div>
             <i class="fa-solid fa-ticket text-[250px] absolute -right-10 -bottom-10 opacity-10 rotate-12 group-hover:rotate-0 transition-all duration-700"></i>
         </section>
@@ -108,58 +106,60 @@
             </div>
             <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 ml-auto">
                 <p class="text-[10px] uppercase font-bold text-slate-400">Saldo TyU-Pay</p>
-                <p class="text-lg font-black text-midnight">RP {{ number_format(Auth::user()->balance, 0, ',', '.') }}</p>
+                <p class="text-lg font-black text-midnight">RP <?php echo e(number_format(Auth::user()->balance, 0, ',', '.')); ?></p>
             </div>
         </div>
 
         <div id="menuSection" class="scroll-mt-24">
             <h2 class="text-lg font-bold mb-4" id="sectionTitle">Menu Kantin</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="foodContainer">
-            @forelse($menus as $menu)
-                @php
+            <?php $__empty_1 = true; $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
                     $menuImgUrl = $menu->image_url 
                         ? ((str_starts_with($menu->image_url, 'http') || str_starts_with($menu->image_url, '/')) ? $menu->image_url : asset($menu->image_url)) 
                         : 'https://via.placeholder.com/300';
-                @endphp
-                <div data-category="{{ $menu->category }}" data-canton="{{ $menu->category }}" class="menu-item food-item bg-white p-4 rounded-[32px] shadow-sm hover:shadow-md transition hover:-translate-y-2 hover:shadow-xl transition-all duration-300" data-name="{{ $menu->name }}" data-base-price="{{ $menu->price }}">
+                ?>
+                <div data-category="<?php echo e($menu->category); ?>" data-canton="<?php echo e($menu->category); ?>" class="menu-item food-item bg-white p-4 rounded-[32px] shadow-sm hover:shadow-md transition hover:-translate-y-2 hover:shadow-xl transition-all duration-300" data-name="<?php echo e($menu->name); ?>" data-base-price="<?php echo e($menu->price); ?>">
                     <div class="mb-2 flex items-center justify-between">
                         <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                            🏪 {{ $menu->canteen->name ?? 'Kantin' }}
+                            🏪 <?php echo e($menu->canteen->name ?? 'Kantin'); ?>
+
                         </span>
                         <span class="text-xs text-gray-500 font-medium">
-                            👩‍🍳 {{ $menu->canteen->ibuKantin->name ?? '-' }}
+                            👩‍🍳 <?php echo e($menu->canteen->ibuKantin->name ?? '-'); ?>
+
                         </span>
                     </div>
-                    <img src="{{ $menuImgUrl }}" alt="{{ $menu->name }}" class="w-full h-44 object-cover rounded-[24px] mb-4 cursor-pointer hover:opacity-75 transition" onclick="showMenuDetailFromHome({{ json_encode($menu) }})">
+                    <img src="<?php echo e($menuImgUrl); ?>" alt="<?php echo e($menu->name); ?>" class="w-full h-44 object-cover rounded-[24px] mb-4 cursor-pointer hover:opacity-75 transition" onclick="showMenuDetailFromHome(<?php echo e(json_encode($menu)); ?>)">
                     <div class="flex justify-between items-start">
-                        <div class="cursor-pointer hover:text-orange-500 transition" onclick="showMenuDetailFromHome({{ json_encode($menu) }})">
-                            <h3 class="menu-name font-bold text-gray-800 text-lg">{{ $menu->name }}</h3>
-                            <p class="text-xs text-gray-500 line-clamp-2">{{ $menu->description }}</p>
+                        <div class="cursor-pointer hover:text-orange-500 transition" onclick="showMenuDetailFromHome(<?php echo e(json_encode($menu)); ?>)">
+                            <h3 class="menu-name font-bold text-gray-800 text-lg"><?php echo e($menu->name); ?></h3>
+                            <p class="text-xs text-gray-500 line-clamp-2"><?php echo e($menu->description); ?></p>
                         </div>
-                        <span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-full font-bold">⭐ {{ $menu->rating ?? '4.7' }}</span>
+                        <span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-full font-bold">⭐ <?php echo e($menu->rating ?? '4.7'); ?></span>
                     </div>
                     <div class="flex justify-between items-center mt-4">
-                        <span class="font-extrabold text-[#122C4F] product-price">RP {{ number_format($menu->price, 0, ',', '.') }}</span>
+                        <span class="font-extrabold text-[#122C4F] product-price">RP <?php echo e(number_format($menu->price, 0, ',', '.')); ?></span>
                         <div class="flex gap-2">
-                            <button onclick="event.stopPropagation(); showMenuDetailFromHome({{ json_encode($menu) }})" class="bg-blue-500 hover:bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center transition-transform" title="Detail">
+                            <button onclick="event.stopPropagation(); showMenuDetailFromHome(<?php echo e(json_encode($menu)); ?>)" class="bg-blue-500 hover:bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center transition-transform" title="Detail">
                                 <i class="fas fa-info-circle"></i>
                             </button>
-                            <button onclick="addToCart('{{ $menu->name }}', {{ $menu->price }}, '{{ $menuImgUrl }}', {{ $menu->canteen_id }}, '{{ addslashes($menu->description ?? '') }}', '{{ $menu->canteen->name ?? 'Kantin' }}'); toggleCart()" class="bg-[#122C4F] text-white w-10 h-10 rounded-2xl flex items-center justify-center hover:bg-blue-800 hover:scale-105 active:scale-95 transition-transform">+</button>
+                            <button onclick="addToCart('<?php echo e($menu->name); ?>', <?php echo e($menu->price); ?>, '<?php echo e($menuImgUrl); ?>', <?php echo e($menu->canteen_id); ?>, '<?php echo e(addslashes($menu->description ?? '')); ?>', '<?php echo e($menu->canteen->name ?? 'Kantin'); ?>'); toggleCart()" class="bg-[#122C4F] text-white w-10 h-10 rounded-2xl flex items-center justify-center hover:bg-blue-800 hover:scale-105 active:scale-95 transition-transform">+</button>
                         </div>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="col-span-3 text-center py-12">
                     <p class="text-gray-500 font-medium">Belum ada menu tersedia saat ini</p>
                 </div>
-            @endforelse
+            <?php endif; ?>
         </div>
 
         <div id="recommendationSection" class="hidden mt-12 pt-8 border-t-2 border-dashed border-gray-200">
             <h2 class="text-lg font-bold mb-4 text-gray-400">Rekomendasi Minuman Segar 🥤</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-4 rounded-2xl shadow-sm opacity-80">
-                    <img src="{{ asset('images/esteh.png') }}" class="rounded-xl w-full">
+                    <img src="<?php echo e(asset('images/esteh.png')); ?>" class="rounded-xl w-full">
                     <h3 class="font-bold mt-2">Es Teh Manis</h3>
                     <p class="text-blue-500 font-bold">RP 5.000</p>
                 </div>
@@ -347,7 +347,8 @@
                         <div class="text-left">
                             <span class="font-bold text-slate-700 block">Saldo TyU-Pay</span>
                             <p class="text-xs text-slate-400" id="balance-indicator">
-                                Saldo: Rp {{ number_format(Auth::user()->balance ?? 0, 0, ',', '.') }}
+                                Saldo: Rp <?php echo e(number_format(Auth::user()->balance ?? 0, 0, ',', '.')); ?>
+
                             </p>
                         </div>
                     </div>
@@ -396,7 +397,7 @@
 
     <!-- Avatar Upload Form (Hidden) -->
     <form id="avatarForm" class="hidden">
-        @csrf
+        <?php echo csrf_field(); ?>
         <input type="file" id="avatarInput" name="avatar" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" onchange="submitAvatarAjax(this)">
     </form>
 
@@ -419,14 +420,15 @@
                 <div class="flex flex-col items-center mb-5">
                     <div class="relative group cursor-pointer" onclick="document.getElementById('avatarInput').click()">
                         <div id="avatarContainer" class="w-20 h-20 rounded-full overflow-hidden border-4 border-blue-100 group-hover:opacity-80 transition-all relative">
-                            @if(Auth::user()->avatar)
-                                <img id="avatarImg" src="{{ asset('storage/avatars/' . Auth::user()->avatar) }}"
+                            <?php if(Auth::user()->avatar): ?>
+                                <img id="avatarImg" src="<?php echo e(asset('storage/avatars/' . Auth::user()->avatar)); ?>"
                                      class="w-full h-full object-cover">
-                            @else
+                            <?php else: ?>
                                 <div id="avatarInitial" class="w-full h-full bg-[#4A7292] text-white flex items-center justify-center text-xl font-black">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
+
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         <div class="absolute bottom-0 right-0 bg-orange-500 w-6 h-6 rounded-full flex items-center justify-center shadow group-hover:scale-110 transition-transform">
                             <i class="fas fa-camera text-white text-[9px]"></i>
@@ -446,43 +448,44 @@
                 <div id="profileViewFields" class="space-y-2.5">
                     <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Nama Lengkap</p>
-                        <p class="text-sm font-bold text-[#122C4F]">{{ Auth::user()->name }}</p>
+                        <p class="text-sm font-bold text-[#122C4F]"><?php echo e(Auth::user()->name); ?></p>
                     </div>
                     <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Username</p>
-                        <p class="text-sm font-bold text-[#122C4F]">{{ Auth::user()->username }}</p>
+                        <p class="text-sm font-bold text-[#122C4F]"><?php echo e(Auth::user()->username); ?></p>
                     </div>
                     <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Email</p>
-                        <p class="text-xs font-medium text-[#122C4F] break-all">{{ Auth::user()->email }}</p>
+                        <p class="text-xs font-medium text-[#122C4F] break-all"><?php echo e(Auth::user()->email); ?></p>
                     </div>
                     <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">No. Telepon</p>
-                        <p class="text-sm font-bold text-[#122C4F]">{{ Auth::user()->phone ?? '-' }}</p>
+                        <p class="text-sm font-bold text-[#122C4F]"><?php echo e(Auth::user()->phone ?? '-'); ?></p>
                     </div>
-                    @if(Auth::user()->nim)
+                    <?php if(Auth::user()->nim): ?>
                     <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">NIM</p>
-                        <p class="text-sm font-bold text-[#122C4F]">{{ Auth::user()->nim }}</p>
+                        <p class="text-sm font-bold text-[#122C4F]"><?php echo e(Auth::user()->nim); ?></p>
                     </div>
-                    @endif
+                    <?php endif; ?>
                     <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">Status</p>
                         <span class="inline-block px-3 py-1 bg-blue-100 text-[#2d6a8f] font-bold rounded-full text-xs capitalize">
-                            {{ Auth::user()->role === 'ibu_kantin' ? 'Mitra Kantin' : ucfirst(Auth::user()->role ?? 'User') }}
+                            <?php echo e(Auth::user()->role === 'ibu_kantin' ? 'Mitra Kantin' : ucfirst(Auth::user()->role ?? 'User')); ?>
+
                         </span>
                     </div>
-                    @if(Auth::user()->address)
+                    <?php if(Auth::user()->address): ?>
                     <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Alamat</p>
-                        <p class="text-xs text-[#122C4F] leading-relaxed">{{ Auth::user()->address }}</p>
+                        <p class="text-xs text-[#122C4F] leading-relaxed"><?php echo e(Auth::user()->address); ?></p>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- Saldo --}}
+                    
                     <div class="bg-[#122C4F] px-4 py-3 rounded-2xl">
                         <p class="text-[9px] text-white/50 font-bold uppercase tracking-widest mb-0.5">Saldo TyU-Pay</p>
-                        <p class="text-lg font-black text-white">Rp {{ number_format(Auth::user()->balance ?? 0, 0, ',', '.') }}</p>
+                        <p class="text-lg font-black text-white">Rp <?php echo e(number_format(Auth::user()->balance ?? 0, 0, ',', '.')); ?></p>
                     </div>
                 </div>
 
@@ -490,32 +493,32 @@
                 <div id="profileEditFields" class="hidden space-y-3.5">
                     <div>
                         <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Nama Lengkap</label>
-                        <input type="text" id="editName" value="{{ Auth::user()->name }}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white">
+                        <input type="text" id="editName" value="<?php echo e(Auth::user()->name); ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white">
                         <span class="text-[10px] text-red-500 font-bold mt-1 block hidden" id="error-name"></span>
                     </div>
                     <div>
                         <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Username</label>
-                        <input type="text" id="editUsername" value="{{ Auth::user()->username }}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white">
+                        <input type="text" id="editUsername" value="<?php echo e(Auth::user()->username); ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white">
                         <span class="text-[10px] text-red-500 font-bold mt-1 block hidden" id="error-username"></span>
                     </div>
                     <div>
                         <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Email</label>
-                        <input type="email" id="editEmail" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white">
+                        <input type="email" id="editEmail" value="<?php echo e(Auth::user()->email); ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white">
                         <span class="text-[10px] text-red-500 font-bold mt-1 block hidden" id="error-email"></span>
                     </div>
                     <div>
                         <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">No. Telepon</label>
-                        <input type="text" id="editPhone" value="{{ Auth::user()->phone }}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white" placeholder="Contoh: 08123456789">
+                        <input type="text" id="editPhone" value="<?php echo e(Auth::user()->phone); ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white" placeholder="Contoh: 08123456789">
                         <span class="text-[10px] text-red-500 font-bold mt-1 block hidden" id="error-phone"></span>
                     </div>
                     <div>
                         <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">NIM (Nomor Induk Mahasiswa)</label>
-                        <input type="text" id="editNim" value="{{ Auth::user()->nim }}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white" placeholder="Optional">
+                        <input type="text" id="editNim" value="<?php echo e(Auth::user()->nim); ?>" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm font-bold text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white" placeholder="Optional">
                         <span class="text-[10px] text-red-500 font-bold mt-1 block hidden" id="error-nim"></span>
                     </div>
                     <div>
                         <label class="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-1">Alamat</label>
-                        <textarea id="editAddress" rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white" placeholder="Masukkan alamat lengkap">{{ Auth::user()->address }}</textarea>
+                        <textarea id="editAddress" rows="2" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm text-[#122C4F] focus:outline-none focus:border-[#122C4F] transition bg-slate-50 focus:bg-white" placeholder="Masukkan alamat lengkap"><?php echo e(Auth::user()->address); ?></textarea>
                         <span class="text-[10px] text-red-500 font-bold mt-1 block hidden" id="error-address"></span>
                     </div>
                 </div>
@@ -1360,7 +1363,7 @@
                 `;
             } else if (type === 'saldo') {
                 // Saldo TyU-Pay Payment - Show balance
-                const userBalance = {{ Auth::user()->balance ?? 0 }};
+                const userBalance = <?php echo e(Auth::user()->balance ?? 0); ?>;
                 const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
                 const discountPercent = getDiscountPercent();
                 const discountValue = Math.round(subtotal * discountPercent / 100);
@@ -1472,7 +1475,7 @@
 
             // ===== SALDO TYU-PAY: pakai flow lama via /api/orders =====
             if (selectedPaymentType === 'saldo') {
-                const userBalance = {{ Auth::user()->balance ?? 0 }};
+                const userBalance = <?php echo e(Auth::user()->balance ?? 0); ?>;
                 if (userBalance < totalPaid) {
                     alert('⚠️ Saldo tidak cukup!\n\nSaldo kamu: Rp ' + userBalance.toLocaleString('id-ID') + '\nTotal: Rp ' + totalPaid.toLocaleString('id-ID'));
                     return;
@@ -1818,4 +1821,6 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.pembeli', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Project Web\Web Food-TYU\hulahup-localhost\resources\views/home.blade.php ENDPATH**/ ?>

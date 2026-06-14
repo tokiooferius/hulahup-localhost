@@ -323,12 +323,12 @@
                 <!-- Mini stats -->
                 <div class="flex flex-wrap gap-6">
                     <div>
-                        <p class="text-3xl font-black text-white" id="heroStat1">3</p>
+                        <p class="text-3xl font-black text-white" id="heroStat1">{{ $activeCanteenCount ?: $totalCanteenCount }}</p>
                         <p class="text-xs text-white/50 font-bold uppercase tracking-widest">Kantin Aktif</p>
                     </div>
                     <div class="w-px bg-white/15"></div>
                     <div>
-                        <p class="text-3xl font-black text-white" id="heroStat2">50+</p>
+                        <p class="text-3xl font-black text-white" id="heroStat2">{{ $totalMenuCount }}+</p>
                         <p class="text-xs text-white/50 font-bold uppercase tracking-widest">Pilihan Menu</p>
                     </div>
                     <div class="w-px bg-white/15"></div>
@@ -474,26 +474,26 @@
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 reveal">
-            @php
-                $stats = [
-                    ['icon'=>'🏪','val'=>'3','label'=>'Kantin Aktif','sub'=>'Siap melayani','color'=>'from-[#0B2D5C] to-[#2D6A8F]'],
-                    ['icon'=>'🍽️','val'=>'50+','label'=>'Pilihan Menu','sub'=>'Update tiap hari','color'=>'from-[#2D6A8F] to-[#7AB8FF]'],
-                    ['icon'=>'⚡','val'=>'< 15','label'=>'Menit Proses','sub'=>'Rata-rata waktu siap','color'=>'from-[#a855f7] to-[#F5A8D0]'],
-                    ['icon'=>'⭐','val'=>'4.9','label'=>'Rating Rata-rata','sub'=>'Dari pengguna aktif','color'=>'from-[#F5A8D0] to-[#F472B6]'],
-                ];
-            @endphp
-            @foreach($stats as $i => $s)
-            <div class="card-hover bg-white rounded-3xl p-7 text-center border border-[var(--navy)]/5 shadow-sm relative overflow-hidden" style="transition-delay:{{ $i*0.1 }}s">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r {{ $s['color'] }}"></div>
-                <div class="text-4xl mb-3">{{ $s['icon'] }}</div>
-                <p class="text-4xl font-black text-[var(--navy)] mb-1 counter" data-target="{{ $s['val'] }}">{{ $s['val'] }}</p>
-                <p class="font-black text-[var(--navy)]/80 text-sm mb-1">{{ $s['label'] }}</p>
-                <p class="text-slate-400 text-xs font-medium">{{ $s['sub'] }}</p>
-            </div>
-            @endforeach
+        @php
+            $stats = [
+                ['icon'=>'🏪','val'=> ($activeCanteenCount ?: $totalCanteenCount) . '','label'=>'Kantin Aktif','sub'=>'Siap melayani sekarang','color'=>'from-[#0B2D5C] to-[#2D6A8F]'],
+                ['icon'=>'🍽️','val'=> $totalMenuCount . '+','label'=>'Pilihan Menu','sub'=>'Update tiap hari','color'=>'from-[#2D6A8F] to-[#7AB8FF]'],
+                ['icon'=>'⚡','val'=>'< 15','label'=>'Menit Proses','sub'=>'Rata-rata waktu siap','color'=>'from-[#a855f7] to-[#F5A8D0]'],
+                ['icon'=>'⭐','val'=>'4.9','label'=>'Rating Rata-rata','sub'=>'Dari pengguna aktif','color'=>'from-[#F5A8D0] to-[#F472B6]'],
+            ];
+        @endphp
+        @foreach($stats as $i => $s)
+        <div class="card-hover bg-white rounded-3xl p-7 text-center border border-[var(--navy)]/5 shadow-sm relative overflow-hidden" style="transition-delay:{{ $i*0.1 }}s">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r {{ $s['color'] }}"></div>
+            <div class="text-4xl mb-3">{{ $s['icon'] }}</div>
+            <p class="text-4xl font-black text-[var(--navy)] mb-1">{{ $s['val'] }}</p>
+            <p class="font-black text-[var(--navy)]/80 text-sm mb-1">{{ $s['label'] }}</p>
+            <p class="text-slate-400 text-xs font-medium">{{ $s['sub'] }}</p>
+        </div>
+        @endforeach
         </div>
 
-        <!-- Live ticker -->
+        <!-- Live ticker dengan data realtime -->
         <div class="mt-10 glass-dark rounded-2xl p-5 flex flex-wrap items-center gap-4 reveal">
             <div class="flex items-center gap-2">
                 <span class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></span>
@@ -501,7 +501,17 @@
             </div>
             <div class="flex-1 overflow-hidden">
                 <div id="liveTicker" class="text-white/90 text-sm font-semibold stat-tick">
-                    🍜 Seseorang baru saja memesan <strong>Mie Ayam Spesial</strong> dari Kantin A
+                    @if($latestOrder && $latestOrder->canteen)
+                        @php
+                            $tickerItems = is_array($latestOrder->items) ? $latestOrder->items : (json_decode($latestOrder->items, true) ?: []);
+                            $firstItem = $tickerItems[0] ?? null;
+                            $menuName = $firstItem['name'] ?? $firstItem['menu_name'] ?? 'menu lezat';
+                            $buyerName = $latestOrder->user?->name ?? 'Mahasiswa';
+                        @endphp
+                        🍽️ <strong>{{ $buyerName }}</strong> baru saja memesan <strong>{{ $menuName }}</strong> dari {{ $latestOrder->canteen->name }}
+                    @else
+                        🍜 Seseorang baru saja memesan <strong>Mie Ayam Spesial</strong> dari Kantin Barokah
+                    @endif
                 </div>
             </div>
             <span class="text-[var(--pink)] text-xs font-black">REALTIME</span>
@@ -530,10 +540,10 @@
         </div>
 
         @php
-            $canteens = \App\Models\Canteen::take(3)->get();
+            $canteensData = $canteens ?? collect();
         @endphp
 
-        @if($canteens->isEmpty())
+        @if($canteensData->isEmpty())
         <!-- Demo cards when no canteen data -->
         <div class="grid md:grid-cols-3 gap-8 reveal">
             @php
@@ -573,20 +583,21 @@
 
         @else
         <!-- Real canteen data -->
-        <div class="grid md:grid-cols-{{ min(3, $canteens->count()) }} gap-8 reveal">
-            @foreach($canteens as $i => $canteen)
+        <div class="grid md:grid-cols-{{ min(3, $canteensData->count()) }} gap-8 reveal">
+            @foreach($canteensData as $i => $canteen)
             @php
                 $imgSrc = $canteen->image ?? $canteen->logo_url ?? null;
                 $imgUrl = $imgSrc ? asset($imgSrc) : null;
                 $fallback = 'https://ui-avatars.com/api/?name='.urlencode($canteen->name).'&background=0B2D5C&color=fff&size=400&bold=true&font-size=0.35';
-                $menuCount = $canteen->menus()->where('is_available', true)->count();
+                $menuCount = $canteen->menus_count ?? $canteen->menus()->where('is_available', true)->count();
+                $isOpen = isset($canteen->status) ? in_array($canteen->status, ['buka', 'active', 'open']) : true;
             @endphp
             <div class="card-hover bg-white rounded-3xl overflow-hidden border border-[var(--navy)]/5 shadow-sm" style="transition-delay:{{ $i*0.1 }}s">
                 <div class="h-48 relative overflow-hidden">
                     <img src="{{ $imgUrl ?? $fallback }}" alt="{{ $canteen->name }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent"></div>
                     <div class="absolute top-4 right-4">
-                        <span class="text-xs font-black px-3 py-1.5 rounded-full bg-green-400/20 text-green-100 border border-green-400/30">● Buka</span>
+                        <span class="text-xs font-black px-3 py-1.5 rounded-full {{ $isOpen ? 'bg-green-400/20 text-green-100 border border-green-400/30' : 'bg-red-400/20 text-red-100 border border-red-400/30' }}">{{ $isOpen ? '● Buka' : '● Tutup' }}</span>
                     </div>
                     <div class="absolute top-4 left-4 glass rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
                         <i class="fas fa-star text-yellow-400 text-xs"></i>
@@ -626,7 +637,8 @@
         </div>
 
         @php
-            $trendingMenus = \App\Models\Menu::where('is_available', true)->inRandomOrder()->take(6)->get();
+            // $trendingMenus sudah disiapkan dari route dengan data penjualan realtime
+            $trendingMenus = $trendingMenus ?? collect();
         @endphp
 
         @if($trendingMenus->isEmpty())
@@ -659,21 +671,51 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 reveal">
             @foreach($trendingMenus as $i => $menu)
             @php
-                $menuImg = $menu->image ? asset('storage/menus/'.$menu->image) : null;
+                // Cari gambar menu dengan berbagai kemungkinan path
+                $menuImg = null;
+                if (!empty($menu->image_url)) {
+                    $menuImg = str_starts_with($menu->image_url, 'http') ? $menu->image_url : asset('storage/' . ltrim($menu->image_url, '/'));
+                } elseif (!empty($menu->image)) {
+                    $menuImg = str_starts_with($menu->image, 'http') ? $menu->image : asset('storage/menus/' . $menu->image);
+                }
+                $soldCount = $menu->sold_count ?? 0;
+                $categoryEmoji = match($menu->category ?? '') {
+                    'heavy' => '🍽️', 'beverage' => '🥤', 'snack' => '🍿', default => '🍽️'
+                };
             @endphp
-            <div class="card-hover bg-white rounded-2xl p-4 text-center border border-[var(--navy)]/5 shadow-sm" style="transition-delay:{{ $i*0.08 }}s">
+            <div class="card-hover bg-white rounded-2xl overflow-hidden border border-[var(--navy)]/5 shadow-sm" style="transition-delay:{{ $i*0.08 }}s">
+                <!-- Image or emoji -->
                 @if($menuImg)
-                    <div class="w-14 h-14 mx-auto rounded-xl overflow-hidden mb-3">
-                        <img src="{{ $menuImg }}" alt="{{ $menu->name }}" class="w-full h-full object-cover">
+                <div class="w-full h-28 overflow-hidden relative">
+                    <img src="{{ $menuImg }}" alt="{{ $menu->name }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    <div style="display:none;" class="absolute inset-0 bg-gradient-to-br from-[var(--navy)]/10 to-[var(--blue)]/20 items-center justify-center text-4xl">{{ $categoryEmoji }}</div>
+                    @if($soldCount > 0)
+                    <div class="absolute top-2 right-2">
+                        <span class="text-[9px] bg-red-500 text-white font-black px-2 py-0.5 rounded-full shadow">🔥 {{ $soldCount }}x</span>
                     </div>
+                    @endif
+                </div>
                 @else
-                    <div class="text-4xl mb-3">🍽️</div>
+                <div class="w-full h-28 bg-gradient-to-br from-[var(--navy)]/5 to-[var(--blue)]/10 flex items-center justify-center relative">
+                    <span class="text-4xl">{{ $categoryEmoji }}</span>
+                    @if($soldCount > 0)
+                    <div class="absolute top-2 right-2">
+                        <span class="text-[9px] bg-red-500 text-white font-black px-2 py-0.5 rounded-full shadow">🔥 {{ $soldCount }}x</span>
+                    </div>
+                    @endif
+                </div>
                 @endif
-                <p class="font-black text-[var(--navy)] text-sm mb-1 line-clamp-2">{{ $menu->name }}</p>
-                <p class="text-green-600 font-black text-sm mb-2">Rp {{ number_format($menu->price, 0, ',', '.') }}</p>
-                <div class="flex items-center justify-center gap-1">
-                    <i class="fas fa-star text-yellow-400 text-xs"></i>
-                    <span class="text-xs font-bold text-slate-600">4.8</span>
+                <div class="p-3 text-center">
+                    <p class="font-black text-[var(--navy)] text-xs mb-1 line-clamp-2 leading-tight">{{ $menu->name }}</p>
+                    <p class="text-green-600 font-black text-sm mb-1">Rp {{ number_format($menu->price, 0, ',', '.') }}</p>
+                    @if($menu->canteen)
+                    <p class="text-[9px] text-slate-400 font-semibold mb-1 truncate">{{ $menu->canteen->name }}</p>
+                    @endif
+                    <div class="flex items-center justify-center gap-1">
+                        <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        <span class="text-xs font-bold text-slate-600">{{ $menu->rating ?? '4.8' }}</span>
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -714,19 +756,26 @@
                 ['icon'=>'fa-credit-card','emoji'=>'💳','title'=>'QRIS & TyU-Pay','desc'=>'Bayar dengan QRIS atau gunakan saldo deposit TyU-Pay. Aman, cepat, dan tidak perlu uang tunai.','color'=>'from-blue-400 to-indigo-500'],
                 ['icon'=>'fa-ticket-alt','emoji'=>'🎟️','title'=>'Voucher & Diskon','desc'=>'Nikmati berbagai voucher diskon khusus mahasiswa Tel-U. Hemat lebih banyak setiap hari.','color'=>'from-pink-400 to-rose-500'],
                 ['icon'=>'fa-bell','emoji'=>'🔔','title'=>'Notifikasi Pintar','desc'=>'Dapat notifikasi real-time saat pesanan diproses, siap diambil, atau ada promosi spesial.','color'=>'from-green-400 to-teal-500'],
+                ['icon'=>'fa-robot','emoji'=>'🤖','title'=>'AI Chatbot Assistant','desc'=>'Bingung mau makan apa? Tanya asisten AI Food-TYU! Ditenagai Gemini AI, siap kasih rekomendasi menu sesuai mood dan budget kamu.','color'=>'from-violet-400 to-purple-600'],
                 ['icon'=>'fa-chart-bar','emoji'=>'📊','title'=>'Dashboard Kantin','desc'=>'Pemilik kantin punya dashboard lengkap untuk kelola menu, pesanan, laporan penjualan, dan keuangan.','color'=>'from-purple-400 to-violet-500'],
                 ['icon'=>'fa-shield-alt','emoji'=>'🔒','title'=>'Transaksi Aman','desc'=>'Data dan transaksi terlindungi. Terintegrasi dengan sistem keamanan berlapis dan enkripsi penuh.','color'=>'from-red-400 to-rose-600'],
             ];
         @endphp
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @foreach($features as $i => $f)
-            <div class="glass rounded-3xl p-7 card-hover group reveal" style="transition-delay:{{ $i*0.1 }}s">
+            <div class="glass rounded-3xl p-7 card-hover group reveal {{ $loop->last ? 'md:col-span-2 lg:col-span-1 xl:col-span-1' : '' }}" style="transition-delay:{{ $i*0.1 }}s">
                 <div class="feat-icon w-14 h-14 bg-gradient-to-br {{ $f['color'] }} rounded-2xl flex items-center justify-center text-2xl mb-5 shadow-lg">
                     {{ $f['emoji'] }}
                 </div>
                 <h3 class="text-white font-black text-xl mb-3">{{ $f['title'] }}</h3>
                 <p class="text-white/60 text-sm font-medium leading-relaxed">{{ $f['desc'] }}</p>
+                @if($f['emoji'] === '🤖')
+                <div class="mt-4 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    <span class="text-green-400 text-xs font-bold">Powered by Gemini AI</span>
+                </div>
+                @endif
             </div>
             @endforeach
         </div>

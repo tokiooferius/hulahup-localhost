@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buku Panduan Demo & Presentasi Final - Hulahup App</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #e0f2fe;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --danger: #dc2626;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-body);
+            line-height: 1.7;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            padding: 4rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(148, 163, 184, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        header {
+            border-bottom: 2px dashed var(--border);
+            padding-bottom: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .badge {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 3rem;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            text-align: justify;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code Block */
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.25rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            border: 1px solid #1e293b;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--code-bg);
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+
+        /* Demo Steps */
+        .demo-step {
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .step-num {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background-color: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);
+        }
+
+        .demo-step h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .demo-action {
+            background-color: #fff;
+            border-left: 4px solid var(--success);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            margin: 0.75rem 0;
+            font-size: 0.95rem;
+        }
+
+        .demo-explain {
+            background-color: #fff;
+            border-left: 4px solid var(--warning);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            margin: 0.75rem 0;
+            font-size: 0.95rem;
+        }
+
+        /* Q&A Cards */
+        .qa-card {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .qa-question {
+            font-weight: 700;
+            color: #15803d;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qa-answer {
+            color: var(--text-main);
+            font-size: 0.95rem;
+            padding-left: 1.5rem;
+        }
+
+        /* Tech Detail Card */
+        .tech-card {
+            background-color: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .tech-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Print Button */
+        .print-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+        }
+
+        .print-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
+        }
+
+        .print-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Page Breaks */
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Print Styling */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .print-btn-container {
+                display: none;
+            }
+            .demo-step {
+                background-color: #fff;
+                page-break-inside: avoid;
+                border: 1px solid var(--border);
+            }
+            .qa-card {
+                background-color: #fff;
+                page-break-inside: avoid;
+                border: 1px solid #bbf7d0;
+            }
+            .tech-card {
+                background-color: #fff;
+                page-break-inside: avoid;
+                border: 1px solid var(--border);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Tombol Cetak PDF -->
+        <div class="print-btn-container">
+            <button class="print-btn" onclick="window.print()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Ekspor Buku Panduan ke PDF
+            </button>
+        </div>
+
+        <header>
+            <div class="badge">Bahan Sidang / Demo Aplikasi</div>
+            <h1>Buku Panduan & Skenario Demo</h1>
+            <div class="subtitle">Aplikasi Kantin Digital "Hulahup" (Food-TYU) Telkom University</div>
+        </header>
+
+        <h2>📌 Pendahuluan & Ringkasan Sistem</h2>
+        <p><strong>Hulahup App (Food-TYU)</strong> adalah sistem informasi e-canteen berbasis web yang dibangun untuk mengatasi masalah antrean panjang dan kerumitan transaksi tunai di kantin kampus Telkom University. Aplikasi ini menerapkan konsep <em>Single Checkout & Split Order Processing</em>, di mana pembeli dapat memesan makanan dari kantin berbeda sekaligus, namun diproses secara terpisah di masing-masing dapur kantin.</p>
+        <p>Aplikasi ini memiliki keunggulan integrasi gerbang pembayaran online <strong>Midtrans</strong> untuk kemudahan pengisian saldo digital, serta asisten kuliner pintar menggunakan teknologi generative <strong>Google Gemini AI API</strong>.</p>
+
+        <div class="page-break"></div>
+
+        <h2>🛠️ Bedah Kode & Cara Pembuatan Fitur (Teknis)</h2>
+        <p>Gunakan penjelasan ini jika dosen bertanya **"bagaimana cara kamu membuat fitur ini?"** atau meminta Anda menjelaskan potongan kodenya:</p>
+
+        <!-- TECH 1: ANIMASI -->
+        <div class="tech-card">
+            <div class="tech-title">🎨 1. Bagaimana Cara Membuat Animasi Bergerak di Halaman?</div>
+            <p>Semua animasi visual yang berjalan di landing page (seperti kartu melayang, teks berjalan, dan cincin notifikasi) dibangun menggunakan kombinasi <strong>CSS Keyframes</strong> dan <strong>Tailwind Utility Classes</strong>.</p>
+            
+            <p><strong>A. Animasi Kartu/Hero Melayang (Floating Effect)</strong><br>
+            Untuk memberikan kesan modern dan premium, gambar hero melayang naik turun secara halus menggunakan interpolasi <code>transform</code> pada sumbu Y.</p>
+            <pre><code>/* Didefinisikan di resources/views/welcome.blade.php */
+@keyframes floatY {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+.animate-float-slow {
+    animation: floatY 6s ease-in-out infinite;
+}</code></pre>
+            
+            <p><strong>B. Animasi Teks & Logo Berjalan (Infinite Marquee)</strong><br>
+            Banner nama-nama kantin bergerak tanpa henti secara horizontal. Kami menggunakan <code>transform: translateX</code> dari 0% ke -50% dengan wrapper yang diduplikasi datanya sehingga pergeserannya terlihat tidak terputus (*seamless loop*).</p>
+            <pre><code>@keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 20s linear infinite;
+}</code></pre>
+
+            <p><strong>C. Animasi Cincin Notifikasi Chatbot (Pulse Ring)</strong><br>
+            Untuk memancing interaksi pengguna ke arah chatbot tanpa mengganggu estetika halaman, kami menggunakan efek gelombang berdenyut di sekitar ikon robot chatbot.</p>
+            <pre><code>@keyframes pulseRing {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.5); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(2, 132, 199, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+}</code></pre>
+            <p><em>Poin Tambahan Sidang:</em> Penulisan animasi dilakukan dengan menargetkan properti <code>transform</code> dan <code>opacity</code> karena kedua properti tersebut didelegasikan langsung ke GPU (*Hardware Acceleration*), sehingga animasi tetap berjalan lancar pada kecepatan 60 FPS tanpa membebani memori CPU browser.</p>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- TECH 2: CHATBOT -->
+        <div class="tech-card">
+            <div class="tech-title">🤖 2. Bagaimana Cara Membuat Fitur AI Chatbot (Gemini AI)?</div>
+            <p>Fitur Chatbot dibangun dengan arsitektur <strong>Client-Server API Integration</strong> yang menghubungkan frontend web dengan Google Gemini API melalui backend Laravel secara aman.</p>
+            
+            <h3>A. Sisi Frontend (Vanilla JavaScript di View layout)</h3>
+            <p>Saat pengguna mengetik pesan dan mengkliknya, JavaScript akan mengambil riwayat percakapan (*chat history*) serta pesan baru, kemudian mengirimkannya via request POST menggunakan API <code>fetch()</code>:</p>
+            <pre><code>// Mengirim pesan secara asynchronous
+const response = await fetch('/api/chatbot/chat', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({
+        message: userTextInput,
+        history: chatHistoryArray // Riwayat dikirim agar chatbot ingat konteks obrolan sebelumnya
+    })
+});
+const data = await response.json();
+appendBotReply(data.reply); // Tampilkan balasan chatbot</code></pre>
+
+            <h3>B. Sisi Backend (ChatbotController.php)</h3>
+            <p>Di backend, Laravel melakukan pengumpulan data menu secara dinamis dan menembak REST API Google Gemini:</p>
+            <ol>
+                <li><strong>Mengambil Menu Aktif dari Database SQL:</strong><br>
+                    <code>$menus = Menu::where('is_available', true)->with('canteen')->get();</code><br>
+                    Data menu ini diubah menjadi format teks daftar terstruktur.
+                </li>
+                <li><strong>Menyusun System Instruction (Instruksi Dasar AI):</strong><br>
+                    Kami menyuntikkan data menu nyata tersebut ke dalam perintah sistem, serta mendikte gaya bahasanya agar menggunakan slang kampus Tel-U (menggunakan kata ganti *kamu*, *kak*, *bro*, dll.) serta menginstruksikan AI untuk <strong>hanya</strong> merekomendasikan menu yang ada dalam daftar tersebut.
+                </li>
+                <li><strong>Menembak Endpoint Google Gemini API via HTTP Client Laravel:</strong></li>
+            </ol>
+            <pre><code>// Model yang digunakan: gemini-2.5-flash (terbaru, cepat, hemat kuota token)
+$response = Http::timeout(15)->post(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . env('GEMINI_API_KEY'), 
+    [
+        'contents' => $contents, // Gabungan history chat dan pesan user baru
+        'systemInstruction' => [
+            'parts' => [
+                ['text' => $systemInstruction] // Berisi data database menu kampus Tel-U
+            ]
+        ]
+    ]
+);
+
+if ($response->successful()) {
+    $reply = $response->json()['candidates'][0]['content']['parts'][0]['text'];
+    return response()->json(['reply' => $reply]);
+}</code></pre>
+            <p><em>Poin Tambahan Sidang:</em> Penggunaan <code>env('GEMINI_API_KEY')</code> menjaga keamanan kredensial agar API key tidak bocor ke publik atau repositori GitHub. Jika koneksi API gagal, sistem dilindungi oleh blok <code>try-catch</code> yang mengembalikan rekomendasi cadangan (*fallback*) tanpa merusak antarmuka pengguna.</p>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>🧭 Alur Skenario Demo Presentasi (Step-by-Step)</h2>
+        <p>Gunakan urutan langkah berikut ini saat mendemokan aplikasi di depan dosen penguji agar presentasi berjalan sistematis dan menonjolkan fitur-fitur utama:</p>
+
+        <!-- STEP 1 -->
+        <div class="demo-step">
+            <div class="step-num">1</div>
+            <h4>Landing Page Utama & Informasi Realtime</h4>
+            <div class="demo-action">
+                <strong>Aksi Demo:</strong> Buka halaman depan <code>http://localhost:8000/</code> sebelum melakukan login. Tunjukkan bagian statistik di Hero section.
+            </div>
+            <div class="demo-explain">
+                <strong>Poin Penjelasan untuk Dosen:</strong>
+                <ul>
+                    <li>Jelaskan bahwa data statistik ("Kantin Aktif", "Pilihan Menu") ditarik secara <strong>realtime</strong> dari database melalui relasi model, bukan angka hardcode.</li>
+                    <li>Tunjukkan baris <em>Live Order Ticker</em> (pesanan terbaru pembeli) yang bergerak secara dinamis sesuai transaksi terakhir di database.</li>
+                    <li>Tunjukkan section "Menu Terpopuler" yang diurutkan otomatis berdasarkan menu yang paling banyak dibeli pada transaksi sukses.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="demo-step">
+            <div class="step-num">2</div>
+            <h4>Registrasi Akun Mahasiswa (Otomasi RBAC)</h4>
+            <div class="demo-action">
+                <strong>Aksi Demo:</strong> Klik tombol <strong>Sign Up</strong>. Pilih tipe akun <strong>Mahasiswa Tel-U</strong>. Masukkan email berdomain <code>@student.telkomuniversity.ac.id</code> dan isi <strong>NIM (12 digit)</strong>. Klik daftar dan login.
+            </div>
+            <div class="demo-explain">
+                <strong>Poin Penjelasan untuk Dosen:</strong>
+                <ul>
+                    <li>Jelaskan sistem penentuan peran otomatis di <code>AuthController.php</code>. Jika pembeli mendaftar dengan NIM atau email Tel-U, sistem secara otomatis memberi peran <code>mahasiswa</code> (bukan <code>user</code> biasa).</li>
+                    <li>Mahasiswa Tel-U secara otomatis mendapatkan bonus saldo awal e-wallet sebesar **Rp 50.000** (diatur di database seeder/registrasi) untuk mensimulasikan sistem e-money internal kampus.</li>
+                    <li>Tunjukkan lencana khusus <em>"✨ Mahasiswa Tel-U"</em> yang muncul di navbar pembeli setelah login.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="demo-step">
+            <div class="step-num">3</div>
+            <h4>Keranjang Pemesanan Multi-Kantin</h4>
+            <div class="demo-action">
+                <strong>Aksi Demo:</strong> Masuk ke halaman <strong>Kantin</strong>. Pilih <strong>Kantin Barokah</strong>, lalu masukkan <em>Bakso Malang</em> ke keranjang. Kembali, pilih <strong>Kantin Segar</strong>, lalu masukkan <em>Bubble Ice Taro</em>. Buka halaman keranjang belanja (Cart).
+            </div>
+            <div class="demo-explain">
+                <strong>Poin Penjelasan untuk Dosen:</strong>
+                <ul>
+                    <li>Tunjukkan bahwa keranjang belanja secara cerdas **mengelompokkan menu berdasarkan kantin asalnya** secara visual.</li>
+                    <li>Jelaskan konsep *Split Order* di backend. Saat pembeli mengklik checkout, pesanan akan dipecah menjadi beberapa record transaksi berbeda berdasarkan <code>canteen_id</code> agar masing-masing Ibu Kantin hanya menerima daftar pesanan miliknya sendiri.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="demo-step">
+            <div class="step-num">4</div>
+            <h4>Penggunaan Voucher & Pembayaran E-Wallet TyU-Pay</h4>
+            <div class="demo-action">
+                <strong>Aksi Demo:</strong> Di halaman keranjang, coba masukkan kode voucher (contoh: buat promo di admin terlebih dahulu, atau gunakan voucher default). Pilih metode pembayaran **Saldo TyU-Pay**, lalu klik bayar.
+            </div>
+            <div class="demo-explain">
+                <strong>Poin Penjelasan untuk Dosen:</strong>
+                <ul>
+                    <li>Tunjukkan validasi voucher yang berjalan secara realtime menggunakan API endpoint. Diskon akan memotong total belanja secara instan.</li>
+                    <li>Saat menggunakan Saldo TyU-Pay, sistem akan memotong saldo pembeli dan mentransfernya secara aman ke saldo penampungan gerai kantin masing-masing.</li>
+                    <li>Demonstrasikan keamanan saldo: Jika saldo pembeli kurang dari total belanja, transaksi akan ditolak secara aman oleh backend (validasi sisi server di <code>OrderController::store</code>).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div class="demo-step">
+            <div class="step-num">5</div>
+            <h4>Tanya Jawab Pintar via AI Chatbot (Gemini API)</h4>
+            <div class="demo-action">
+                <strong>Aksi Demo:</strong> Klik icon robot asisten di sebelah tombol notifikasi di navbar. Tanyakan rekomendasi seperti: <em>"saya mau makanan yang pedes tapi gak berkuah"</em> atau <em>"rekomendasi minuman dingin rasa buah dong"</em>.
+            </div>
+            <div class="demo-explain">
+                <strong>Poin Penjelasan untuk Dosen:</strong>
+                <ul>
+                    <li>Tunjukkan bagaimana chatbot memberikan rekomendasi hidangan dingin atau pedas kering secara akurat berdasarkan menu yang benar-benar dijual di kantin.</li>
+                    <li>AI asisten merespons dengan logat kasual kampus Tel-U dan menyisipkan emoji, menghidupkan suasana pemesanan makanan.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- STEP 6 -->
+        <div class="demo-step">
+            <div class="step-num">6</div>
+            <h4>Pemrosesan Pesanan oleh Ibu Kantin</h4>
+            <div class="demo-action">
+                <strong>Aksi Demo:</strong> Lakukan login sebagai akun Ibu Kantin (Bu Sari: <code>busari_kantin</code> / <code>kantin123</code>). Masuk ke halaman **Pesanan Masuk (Orders)**.
+            </div>
+            <div class="demo-explain">
+                <strong>Poin Penjelasan untuk Dosen:</strong>
+                <ul>
+                    <li>Tunjukkan bahwa pesanan dari langkah sebelumnya masuk ke daftar *Pending* secara instan.</li>
+                    <li>Klik **Proses Masak** (status berubah menjadi *Processing*), lalu klik **Selesai** (status menjadi *Completed*).</li>
+                    <li>Jelaskan bahwa pembeli akan menerima notifikasi status pesanan secara dinamis di dasbor mereka ketika Ibu Kantin memperbarui status.</li>
+                    <li>Tunjukkan fitur ekspor data menu & pesanan ke PDF/CSV untuk pembukuan gerai.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 7 -->
+        <div class="demo-step">
+            <div class="step-num">7</div>
+            <h4>Panel Kontrol Utama (Admin Panel)</h4>
+            <div class="demo-action">
+                <strong>Aksi Demo:</strong> Login sebagai Admin (<code>admin</code> / <code>admin123</code>). Jelaskan menu navigasi admin: Dashboard, Kelola Pengguna, Voucher, dan Ekspor Rekap.
+            </div>
+            <div class="demo-explain">
+                <strong>Poin Penjelasan untuk Dosen:</strong>
+                <ul>
+                    <li>Tunjukkan panel monitoring global: grafik total transaksi, pesanan bermasalah, dan rekap saldo kantin.</li>
+                    <li>Mendemonstrasikan pembuatan voucher diskon global baru, lengkap dengan batas kuota dan kedaluwarsa.</li>
+                    <li>Tunjukkan fitur **Ekspor Data ke CSV** untuk pelaporan mingguan/bulanan universitas.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>💬 Tanya Jawab (Q&A) yang Sering Diajukan Dosen</h2>
+        <p>Siapkan jawaban-jawaban teknis berikut jika dosen memberikan pertanyaan mendalam saat sidang/demo:</p>
+
+        <!-- QA 1 -->
+        <div class="qa-card">
+            <div class="qa-question">
+                ❓ Bagaimana cara kerja pemisahan pesanan (Split Order) ketika pembeli membeli dari beberapa kantin sekaligus?
+            </div>
+            <div class="qa-answer">
+                <strong>Jawaban Teknis:</strong><br>
+                Di dalam database, transaksi utama dicatat dalam tabel <code>payments</code> untuk mencatat total uang yang dibayar dan metode pembayarannya. Namun, untuk daftar belanjaan, backend (<code>OrderController::store</code>) akan mendeteksi variasi <code>canteen_id</code> dari item di keranjang. 
+                Sistem akan melakukan perulangan (*loop*) dan memecah item tersebut menjadi baris-baris baru di tabel <code>orders</code> terpisah untuk setiap kantin. Dengan cara ini, relasi data tetap terjaga, dan Ibu Kantin hanya dapat melihat pesanan yang didelegasikan ke kantinnya.
+            </div>
+        </div>
+
+        <!-- QA 2 -->
+        <div class="qa-card">
+            <div class="qa-question">
+                ❓ Bagaimana Anda memastikan chatbot AI tidak merekomendasikan makanan fiktif yang tidak dijual di kantin?
+            </div>
+            <div class="qa-answer">
+                <strong>Jawaban Teknis:</strong><br>
+                Di dalam <code>ChatbotController::chat</code>, sebelum mengirimkan pesan pengguna ke API Gemini, aplikasi melakukan query terlebih dahulu ke database: <code>Menu::where('is_available', true)->with('canteen')->get()</code>. 
+                Hasil query ini diubah menjadi teks daftar menu dan disisipkan ke dalam <code>systemInstruction</code> (konteks instruksi sistem) sebagai database referensi tunggal. AI diinstruksikan secara tegas untuk hanya memberikan rekomendasi berdasarkan daftar tersebut.
+            </div>
+        </div>
+
+        <!-- QA 3 -->
+        <div class="qa-card">
+            <div class="qa-question">
+                ❓ Mengapa Anda menggunakan TailwindCSS v4.0.0 dibanding framework CSS konvensional?
+            </div>
+            <div class="qa-answer">
+                <strong>Jawaban Teknis:</strong><br>
+                TailwindCSS v4.0.0 menggunakan compiler baru berbasis Rust yang terintegrasi langsung dengan Vite secara native melalui plugin <code>@tailwindcss/vite</code>. Hal ini membuat waktu build aset CSS menjadi 10x lebih cepat, menghasilkan ukuran file produksi yang sangat kecil (hanya menyertakan utility class yang benar-benar digunakan), serta mendukung fitur modern CSS seperti CSS Variables tingkat lanjut.
+            </div>
+        </div>
+
+        <!-- QA 4 -->
+        <div class="qa-card">
+            <div class="qa-question">
+                ❓ Bagaimana alur penanganan status pembayaran online jika pembeli menutup popup sebelum bayar?
+            </div>
+            <div class="qa-answer">
+                <strong>Jawaban Teknis:</strong><br>
+                Aplikasi menggunakan sistem **Midtrans Notification Webhook**. Ketika pembeli melakukan transaksi via Midtrans Snap, data disimpan dengan status <code>pending</code>. Jika pembeli membayar, atau menutup transaksi hingga kedaluwarsa, server Midtrans secara asynchronous akan mengirimkan request POST ke webhook endpoint aplikasi kita (<code>/payment/webhook</code>). Webhook Controller kemudian memproses payload tersebut dan memperbarui status di tabel <code>payments</code> dan <code>orders</code> secara otomatis di latar belakang.
+            </div>
+        </div>
+
+        <div class="callout">
+            <div class="callout-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Persiapan Sebelum Demo Berlangsung:
+            </div>
+            <p>Pastikan Anda sudah menjalankan server lokal menggunakan perintah <code>php artisan serve</code> dan compiler <code>npm run dev</code>. Sangat disarankan untuk mengosongkan/mereset database sebelum demo dimulai agar statistik terlihat bersih dengan menjalankan perintah <code>php artisan migrate:fresh --seed</code>.</p>
+        </div>
+    </div>
+
+</body>
+</html>

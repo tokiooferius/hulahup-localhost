@@ -286,17 +286,38 @@
         </div>
 
         <div style="display:flex;align-items:center;gap:12px;">
-            <!-- Notif - buka panel pesanan pending -->
-            <button onclick="typeof openNotifPanel !== 'undefined' ? openNotifPanel() : window.location.href='{{ route('canteen.orders.index') }}'"
-                style="position:relative;padding:8px;border-radius:12px;border:1.5px solid #E5E7EB;background:white;cursor:pointer;transition:all .2s;"
-                onmouseover="this.style.borderColor='#2d6a8f';this.style.background='#EFF6FF'"
-                onmouseout="this.style.borderColor='#E5E7EB';this.style.background='white'"
-                title="Lihat pesanan masuk">
-                <i class="fas fa-bell text-slate-500 text-sm"></i>
-                @if(isset($sidebarPending) && $sidebarPending > 0)
-                <span style="position:absolute;top:5px;right:5px;min-width:16px;height:16px;border-radius:99px;background:#EF4444;border:2px solid white;font-size:9px;font-weight:900;color:white;display:flex;align-items:center;justify-content:center;padding:0 3px;">{{ $sidebarPending }}</span>
-                @endif
-            </button>
+            <!-- Notif - buka panel pesanan pending (Dropdown) -->
+            <div style="position:relative;">
+                <button onclick="toggleNotifDropdown(event)" id="canteenNotifBtn"
+                    style="position:relative;padding:8px;border-radius:12px;border:1.5px solid #E5E7EB;background:white;cursor:pointer;transition:all .2s;"
+                    onmouseover="this.style.borderColor='#2d6a8f';this.style.background='#EFF6FF'"
+                    onmouseout="this.style.borderColor='#E5E7EB';this.style.background='white'"
+                    title="Lihat pesanan masuk">
+                    <i class="fas fa-bell text-slate-500 text-sm"></i>
+                    @if(isset($sidebarPending) && $sidebarPending > 0)
+                    <span style="position:absolute;top:5px;right:5px;min-width:16px;height:16px;border-radius:99px;background:#EF4444;border:2px solid white;font-size:9px;font-weight:900;color:white;display:flex;align-items:center;justify-content:center;padding:0 3px;">{{ $sidebarPending }}</span>
+                    @endif
+                </button>
+
+                <!-- Notification Dropdown Panel -->
+                <div id="canteenNotifDropdown" style="display: none; position: absolute; right: 0; mt: 8px; width: 320px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #E2E8F0; padding: 12px 0; z-index: 1000; margin-top: 10px;">
+                    <div style="padding: 0 16px 8px 16px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 900; color: #1e293b; font-size: 13px;">Pesanan Baru</span>
+                        <span id="canteenNotifCountText" style="font-size: 10px; background: #FEE2E2; color: #EF4444; font-weight: 800; padding: 2px 8px; border-radius: 99px;">{{ $sidebarPending ?? 0 }} Pending</span>
+                    </div>
+                    <div id="canteenNotifList" style="max-height: 260px; overflow-y: auto;">
+                        <div style="padding: 24px 16px; text-align: center; color: #94A3B8; font-size: 12px; font-weight: 600;">
+                            <i class="fas fa-shopping-basket" style="font-size: 20px; margin-bottom: 6px; display: block; opacity: 0.3;"></i>
+                            Tidak ada pesanan pending
+                        </div>
+                    </div>
+                    <div style="padding: 8px 12px 0 12px; border-top: 1px solid #F1F5F9; text-align: center;">
+                        <a href="{{ route('canteen.orders.index') }}" style="display: block; width: 100%; background: #F8FAFC; border-radius: 10px; font-size: 11px; font-weight: 850; color: #2d6a8f; text-decoration: none; padding: 8px 0; transition: all 0.2s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#F8FAFC'">
+                            Lihat Semua Pesanan
+                        </a>
+                    </div>
+                </div>
+            </div>
             <!-- CTA -->
             <a href="{{ route('canteen.menus.create') }}"
                style="background:linear-gradient(135deg,#1a3a5c,#2d6a8f);color:white;font-weight:800;font-size:12px;padding:9px 18px;border-radius:12px;text-decoration:none;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(45,106,143,0.35);transition:all .2s;"
@@ -363,6 +384,267 @@ function showKantinAvatarMsg(text, type) {
     el.style.color = type === 'success' ? '#4ade80' : type === 'error' ? '#f87171' : '#93c5fd';
     el.style.display = 'block';
     if (type === 'success') setTimeout(() => el.style.display = 'none', 2500);
+}
+
+// ===== REAL-TIME ORDER NOTIFICATION SYSTEM (Ibu Kantin) =====
+let lastLatestPendingId = null;
+let isFirstCheck = true;
+
+function toggleNotifDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('canteenNotifDropdown');
+    if (!dropdown) return;
+    
+    const isHidden = dropdown.style.display === 'none';
+    dropdown.style.display = isHidden ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+window.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('canteenNotifDropdown');
+    const btn = document.getElementById('canteenNotifBtn');
+    
+    if (dropdown && dropdown.style.display !== 'none') {
+        if (!dropdown.contains(event.target) && !btn.contains(event.target)) {
+            dropdown.style.display = 'none';
+        }
+    }
+});
+
+function playNewOrderSound(buyerName) {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Chime 1
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+        gain1.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc1.start(audioCtx.currentTime);
+        osc1.stop(audioCtx.currentTime + 0.3);
+
+        // Chime 2 (delayed, higher pitch)
+        setTimeout(() => {
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(1320, audioCtx.currentTime); // E6 note
+            gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc2.start(audioCtx.currentTime);
+            osc2.stop(audioCtx.currentTime + 0.4);
+        }, 120);
+
+        // Notifikasi Suara Vokal (Text-To-Speech / TTS)
+        // Diberikan delay agar tidak bertabrakan dengan bunyi bel (chime)
+        setTimeout(() => {
+            if ('speechSynthesis' in window) {
+                // Batalkan suara yang sedang berjalan (jika ada) untuk menghindari antrean panjang
+                window.speechSynthesis.cancel();
+                
+                const name = buyerName || "Pembeli";
+                const phrase = `Pesanan dari ${name} masuk. `;
+                const text = phrase.repeat(3); // Ulangi kalimat sebanyak 3 kali
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                utterance.lang = 'id-ID'; // Bahasa Indonesia
+                utterance.pitch = 1.15;   // Pitch sedikit tinggi agar terdengar ramah/semangat
+                utterance.rate = 1.05;    // Sedikit lebih cepat agar pengulangan 3x tidak terlalu lambat
+                
+                // Cari suara bahasa Indonesia
+                const voices = window.speechSynthesis.getVoices();
+                const idVoice = voices.find(voice => voice.lang.includes('id'));
+                if (idVoice) {
+                    utterance.voice = idVoice;
+                }
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }, 700);
+
+    } catch (e) {
+        console.warn('Web Audio atau SpeechSynthesis tidak didukung:', e);
+    }
+}
+
+function showOrderNotificationToast(orderNumber, buyerName, timeStr) {
+    let container = document.getElementById('order-toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'order-toast-container';
+        container.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:12px; max-width:360px; width:calc(100vw - 48px);';
+        document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement('div');
+    toast.style.cssText = 'background:linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%); color:white; border-radius:20px; padding:18px; box-shadow:0 10px 25px rgba(255, 65, 108, 0.3); display:flex; gap:14px; align-items:start; transform:translateY(50px); opacity:0; transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position:relative; overflow:hidden;';
+    
+    const glow = document.createElement('div');
+    glow.style.cssText = 'position:absolute; top:-20px; right:-20px; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.15); filter:blur(10px);';
+    toast.appendChild(glow);
+
+    // Dynamic animation styling
+    if (!document.getElementById('bell-shake-style')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'bell-shake-style';
+        styleSheet.textContent = `
+            @keyframes bell-ring {
+                0%, 100% { transform: rotate(0); }
+                15% { transform: rotate(15deg); }
+                30% { transform: rotate(-10deg); }
+                45% { transform: rotate(5deg); }
+                60% { transform: rotate(-5deg); }
+                75% { transform: rotate(2deg); }
+                85% { transform: rotate(-2deg); }
+            }
+            .bell-anim {
+                animation: bell-ring 1s ease-in-out infinite;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+
+    toast.innerHTML += `
+        <div style="background:rgba(255,255,255,0.2); border-radius:12px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fas fa-bell bell-anim" style="font-size:20px;"></i>
+        </div>
+        <div style="flex:1; z-index: 2;">
+            <h5 style="font-weight:900; font-size:14px; margin:0 0 3px 0; text-transform:uppercase; letter-spacing:0.03em;">Pesanan Baru Masuk! 🛍️</h5>
+            <p style="margin:0; font-size:12px; font-weight:600; opacity:0.95;">${orderNumber} &middot; ${buyerName}</p>
+            <p style="margin:4px 0 0 0; font-size:10px; opacity:0.8; font-weight:500;">Baru saja</p>
+            <div style="margin-top:12px; display:flex; gap:8px;">
+                <a href="/canteen/orders" style="background:white; color:#FF416C; border-radius:8px; padding:6px 12px; font-size:11px; font-weight:800; text-decoration:none; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">Kelola Pesanan</a>
+                <button onclick="this.closest('.canteen-toast-item').style.opacity='0'; setTimeout(()=>this.closest('.canteen-toast-item').remove(), 400);" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:white; border-radius:8px; padding:6px 12px; font-size:11px; font-weight:700; cursor:pointer;">Nanti</button>
+            </div>
+        </div>
+    `;
+    
+    toast.className = 'canteen-toast-item';
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    }, 50);
+    
+    // Auto dismiss after 12 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.transform = 'translateY(-20px)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        }
+    }, 12000);
+}
+
+function checkNewOrders() {
+    fetch('/canteen/api/notifications')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Update badge di topbar jika elemennya ada
+                const bellBtn = document.getElementById('canteenNotifBtn');
+                const sidebarLink = document.querySelector('a[href="/canteen/orders"]');
+                
+                if (data.pending_count > 0) {
+                    // Update or create badge in topbar button
+                    let bellBadge = bellBtn ? bellBtn.querySelector('span') : null;
+                    if (bellBadge) {
+                        bellBadge.textContent = data.pending_count;
+                        bellBadge.style.display = 'flex';
+                    } else if (bellBtn) {
+                        bellBtn.insertAdjacentHTML('beforeend', `<span style="position:absolute;top:5px;right:5px;min-width:16px;height:16px;border-radius:99px;background:#EF4444;border:2px solid white;font-size:9px;font-weight:900;color:white;display:flex;align-items:center;justify-content:center;padding:0 3px;">${data.pending_count}</span>`);
+                    }
+                    
+                    // Update sidebar badge
+                    let sBadge = sidebarLink ? sidebarLink.querySelector('.nav-badge') : null;
+                    if (sBadge) {
+                        sBadge.textContent = data.pending_count;
+                        sBadge.style.display = 'inline-block';
+                    } else if (sidebarLink) {
+                        sidebarLink.insertAdjacentHTML('beforeend', `<span class="nav-badge">${data.pending_count}</span>`);
+                    }
+                } else {
+                    // Hide badges
+                    if (bellBtn && bellBtn.querySelector('span')) bellBtn.querySelector('span').style.display = 'none';
+                    if (sidebarLink && sidebarLink.querySelector('.nav-badge')) sidebarLink.querySelector('.nav-badge').style.display = 'none';
+                }
+
+                // Update dropdown list content
+                const listEl = document.getElementById('canteenNotifList');
+                const countTextEl = document.getElementById('canteenNotifCountText');
+                
+                if (countTextEl) countTextEl.textContent = `${data.pending_count} Pending`;
+                
+                if (listEl) {
+                    if (data.orders_list && data.orders_list.length > 0) {
+                        listEl.innerHTML = data.orders_list.map(order => `
+                            <a href="/canteen/orders" style="display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid #F8FAFC; transition: background 0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; text-align: left;">
+                                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                                        <div style="background: #FFF3CD; color: #D97706; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; margin-top: 2px;">
+                                            <i class="fas fa-shopping-basket"></i>
+                                        </div>
+                                        <div>
+                                            <p style="font-weight: 800; color: #1e293b; font-size: 12px; margin: 0;">${order.order_number}</p>
+                                            <p style="font-size: 10px; color: #64748B; margin: 2px 0 0 0; font-weight: 600;">Pelanggan: ${order.buyer_name}</p>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <p style="font-weight: 900; color: #2d6a8f; font-size: 11px; margin: 0;">${order.amount}</p>
+                                        <p style="font-size: 9px; color: #94A3B8; margin: 2px 0 0 0;">${order.time}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        `).join('');
+                    } else {
+                        listEl.innerHTML = `
+                            <div style="padding: 24px 16px; text-align: center; color: #94A3B8; font-size: 12px; font-weight: 600;">
+                                <i class="fas fa-shopping-basket" style="font-size: 20px; margin-bottom: 6px; display: block; opacity: 0.3;"></i>
+                                Tidak ada pesanan pending
+                            </div>
+                        `;
+                    }
+                }
+
+                // Check for new order
+                if (data.latest_pending_id) {
+                    if (lastLatestPendingId !== null && data.latest_pending_id > lastLatestPendingId) {
+                        // A new order has arrived!
+                        playNewOrderSound(data.latest_pending_buyer);
+                        showOrderNotificationToast(data.latest_pending_number, data.latest_pending_buyer, data.latest_pending_time);
+                        
+                        // If current page is orders management, reload list after a small delay
+                        if (window.location.pathname.includes('/canteen/orders')) {
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 3000);
+                        }
+                    }
+                    lastLatestPendingId = data.latest_pending_id;
+                } else {
+                    lastLatestPendingId = 0;
+                }
+                
+                isFirstCheck = false;
+            }
+        })
+        .catch(err => console.error('Error checking new orders:', err));
+}
+
+// Start polling every 5 seconds
+if ({{ auth()->check() ? 'true' : 'false' }}) {
+    // Immediate check on load
+    checkNewOrders();
+    // Repeat check
+    setInterval(checkNewOrders, 5000);
 }
 </script>
 @yield('extra-js')

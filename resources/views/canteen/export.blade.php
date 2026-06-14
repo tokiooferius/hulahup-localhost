@@ -115,10 +115,16 @@
                         <input type="date" name="end_date" class="date-input">
                     </div>
                 </div>
-                <button type="submit" class="btn-download btn-download-primary" style="margin-top: 8px;">
-                    <i class="fas fa-file-excel"></i>
-                    <span>Export Penjualan (.csv)</span>
-                </button>
+                <div style="display: flex; gap: 10px; margin-top: 8px;">
+                    <button type="submit" class="btn-download btn-download-primary" style="flex: 1;">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <button type="button" onclick="printPdfReport('orders')" class="btn-download" style="flex: 1; background: #EF4444; color: white;" onmouseover="this.style.background='#DC2626'" onmouseout="this.style.background='#EF4444'">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Cetak PDF</span>
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -139,17 +145,23 @@
                     <i class="fas fa-info-circle" style="color: #3B82F6; margin-right: 4px;"></i>
                     Data omset menu hanya menghitung pesanan yang berstatus <strong>Selesai (Completed)</strong>.
                 </div>
-                <a href="{{ route('canteen.export.menus') }}" class="btn-download btn-download-secondary">
-                    <i class="fas fa-file-excel"></i>
-                    <span>Export Rekap Menu</span>
-                </a>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{{ route('canteen.export.menus') }}" class="btn-download btn-download-secondary" style="flex: 1;">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Export CSV</span>
+                    </a>
+                    <a href="{{ route('canteen.export.menus.pdf') }}" target="_blank" class="btn-download" style="flex: 1; background: #EF4444; color: white; text-align: center;" onmouseover="this.style.background='#DC2626'" onmouseout="this.style.background='#EF4444'">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Cetak PDF</span>
+                    </a>
+                </div>
             </div>
         </div>
 
     </div>
 
     {{-- Guide Card --}}
-    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 24px;">
+    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 24px; margin-bottom: 24px;">
         <h4 style="color: #0f1f3d; font-size: 14px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
             <i class="fas fa-question-circle" style="color: #64748B;"></i>
             Panduan & Tips Ekspor Data
@@ -162,4 +174,19 @@
     </div>
 
 </div>
+
+<script>
+    function printPdfReport(type) {
+        if (type === 'orders') {
+            const start = document.querySelector('input[name="start_date"]').value;
+            const end = document.querySelector('input[name="end_date"]').value;
+            let url = "{{ route('canteen.export.orders.pdf') }}";
+            const params = [];
+            if (start) params.push('start_date=' + start);
+            if (end) params.push('end_date=' + end);
+            if (params.length) url += '?' + params.join('&');
+            window.open(url, '_blank');
+        }
+    }
+</script>
 @endsection

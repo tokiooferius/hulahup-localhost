@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — Food-TYU</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-foodtyu.png') }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo $__env->yieldContent('title', 'Dashboard'); ?> — Food-TYU</title>
+    <link rel="icon" type="image/png" href="<?php echo e(asset('images/logo-foodtyu.png')); ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    @yield('head-scripts')
+    <?php echo $__env->yieldContent('head-scripts'); ?>
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; }
         html { scroll-behavior: smooth; }
@@ -133,7 +133,7 @@
             .main-content { margin-left: 0; }
         }
 
-        @yield('extra-css')
+        <?php echo $__env->yieldContent('extra-css'); ?>
     </style>
 </head>
 <body style="background:#F5F2E8;">
@@ -143,7 +143,7 @@
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
         <div style="display:flex;align-items:center;gap:12px;">
-            <img src="{{ asset('images/logo-foodtyu.png') }}" alt="Logo" style="width:40px;height:40px;object-fit:contain;border-radius:12px;">
+            <img src="<?php echo e(asset('images/logo-foodtyu.png')); ?>" alt="Logo" style="width:40px;height:40px;object-fit:contain;border-radius:12px;">
             <div>
                 <p style="color:white;font-weight:900;font-size:20px;font-style:italic;line-height:1;">Food-TYU.</p>
                 <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:0.2em;text-transform:uppercase;margin-top:2px;">KANTIN TEL-U</p>
@@ -152,72 +152,74 @@
 
         <!-- User greeting -->
         <div class="user-greeting">
-            @if(Auth::user()->avatar)
-                <img src="{{ asset('storage/avatars/'.Auth::user()->avatar) }}" style="width:38px;height:38px;border-radius:12px;object-fit:cover;">
-            @else
+            <?php if(Auth::user()->avatar): ?>
+                <img src="<?php echo e(asset('storage/avatars/'.Auth::user()->avatar)); ?>" style="width:38px;height:38px;border-radius:12px;object-fit:cover;">
+            <?php else: ?>
                 <div class="avatar" style="background:linear-gradient(135deg,#2d6a8f,#5B88B2);">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
+
                 </div>
-            @endif
+            <?php endif; ?>
             <div style="flex:1;min-width:0;">
-                <p style="color:white;font-weight:800;font-size:13px;line-height:1.2;" class="truncate">{{ Auth::user()->name }}</p>
+                <p style="color:white;font-weight:800;font-size:13px;line-height:1.2;" class="truncate"><?php echo e(Auth::user()->name); ?></p>
                 <p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">
-                    @if(Auth::user()->role === 'mahasiswa')✨ Mahasiswa Tel-U
-                    @elseif(Auth::user()->role === 'admin')👑 Admin
-                    @else👤 User Biasa @endif
+                    <?php if(Auth::user()->role === 'mahasiswa'): ?>✨ Mahasiswa Tel-U
+                    <?php elseif(Auth::user()->role === 'admin'): ?>👑 Admin
+                    <?php else: ?>👤 User Biasa <?php endif; ?>
                 </p>
             </div>
         </div>
     </div>
 
     <nav style="flex:1;overflow-y:auto;padding:6px 0;">
-        <a href="{{ route('home') }}" class="nav-item {{ request()->routeIs('home') ? 'active' : '' }}">
+        <a href="<?php echo e(route('home')); ?>" class="nav-item <?php echo e(request()->routeIs('home') ? 'active' : ''); ?>">
             <div class="nav-icon"><i class="fas fa-house"></i></div>
             Dashboard
         </a>
-        <a href="{{ route('canteens.shop') }}" class="nav-item {{ request()->routeIs('canteens*') ? 'active' : '' }}">
+        <a href="<?php echo e(route('canteens.shop')); ?>" class="nav-item <?php echo e(request()->routeIs('canteens*') ? 'active' : ''); ?>">
             <div class="nav-icon"><i class="fas fa-store"></i></div>
             Daftar Kantin
         </a>
-        <a href="{{ route('orders.active') }}" class="nav-item {{ request()->routeIs('orders.active') ? 'active' : '' }}">
+        <a href="<?php echo e(route('orders.active')); ?>" class="nav-item <?php echo e(request()->routeIs('orders.active') ? 'active' : ''); ?>">
             <div class="nav-icon"><i class="fas fa-clock"></i></div>
             Pesanan Aktif
-            @php
+            <?php
                 $sidebarActiveOrders = 0;
                 try { $sidebarActiveOrders = \App\Models\Order::where('user_id', Auth::id())->whereIn('status',['pending','processing'])->count(); } catch(\Exception $e){}
-            @endphp
-            @if($sidebarActiveOrders > 0)
-                <span class="nav-badge">{{ $sidebarActiveOrders }}</span>
-            @endif
+            ?>
+            <?php if($sidebarActiveOrders > 0): ?>
+                <span class="nav-badge"><?php echo e($sidebarActiveOrders); ?></span>
+            <?php endif; ?>
         </a>
-        <a href="{{ route('orders.history') }}" class="nav-item {{ request()->routeIs('orders.history') ? 'active' : '' }}">
+        <a href="<?php echo e(route('orders.history')); ?>" class="nav-item <?php echo e(request()->routeIs('orders.history') ? 'active' : ''); ?>">
             <div class="nav-icon"><i class="fas fa-history"></i></div>
             Riwayat Pesan
         </a>
-        <a href="/topup" class="nav-item {{ request()->is('topup') ? 'active' : '' }}">
+        <a href="/topup" class="nav-item <?php echo e(request()->is('topup') ? 'active' : ''); ?>">
             <div class="nav-icon"><i class="fas fa-wallet"></i></div>
             Saldo TyU-Pay
         </a>
-        @if(Auth::user()->role === 'admin')
+        <?php if(Auth::user()->role === 'admin'): ?>
         <div class="nav-section-label">Admin</div>
-        <a href="{{ route('admin.dashboard') }}" class="nav-item" style="color:rgba(252,211,77,0.85);">
+        <a href="<?php echo e(route('admin.dashboard')); ?>" class="nav-item" style="color:rgba(252,211,77,0.85);">
             <div class="nav-icon" style="color:rgba(252,211,77,0.9);"><i class="fas fa-crown"></i></div>
             Admin Dashboard
         </a>
-        @elseif(Auth::user()->role === 'ibu_kantin')
+        <?php elseif(Auth::user()->role === 'ibu_kantin'): ?>
         <div class="nav-section-label">Mitra Kantin</div>
-        <a href="{{ route('canteen.dashboard') }}" class="nav-item" style="color:rgba(251,146,60,0.9);">
+        <a href="<?php echo e(route('canteen.dashboard')); ?>" class="nav-item" style="color:rgba(251,146,60,0.9);">
             <div class="nav-icon" style="color:rgba(251,146,60,1.0);"><i class="fas fa-store-alt"></i></div>
             Kantin Dashboard
         </a>
-        @endif
+        <?php endif; ?>
     </nav>
 
     <!-- Saldo TyU-Pay -->
     <div class="saldo-card">
         <p style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;">Saldo TyU-Pay</p>
         <p style="color:white;font-weight:900;font-size:22px;margin-top:4px;letter-spacing:-0.5px;">
-            Rp {{ number_format(Auth::user()->balance ?? 0, 0, ',', '.') }}
+            Rp <?php echo e(number_format(Auth::user()->balance ?? 0, 0, ',', '.')); ?>
+
         </p>
         <a href="/topup" style="font-size:11px;color:rgba(234,216,177,0.85);font-weight:700;text-decoration:none;margin-top:6px;display:inline-flex;align-items:center;gap:4px;">
             <i class="fas fa-plus-circle text-xs"></i> Top Up Sekarang
@@ -232,7 +234,7 @@
 
     <!-- Bottom logout -->
     <div class="sidebar-bottom">
-        <form action="{{ route('logout') }}" method="POST" id="sidebar-logout-form">@csrf</form>
+        <form action="<?php echo e(route('logout')); ?>" method="POST" id="sidebar-logout-form"><?php echo csrf_field(); ?></form>
         <button class="logout-btn" onclick="document.getElementById('sidebar-logout-form').submit()">
             <i class="fas fa-right-from-bracket"></i> Keluar
         </button>
@@ -249,9 +251,9 @@
             </button>
             <div>
                 <p style="font-size:10px;color:#9CA3AF;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">
-                    Food-TYU / @yield('page-title', 'Dashboard')
+                    Food-TYU / <?php echo $__env->yieldContent('page-title', 'Dashboard'); ?>
                 </p>
-                <h1 style="font-size:16px;font-weight:900;color:#0f1f3d;line-height:1.2;">@yield('page-title', 'Dashboard')</h1>
+                <h1 style="font-size:16px;font-weight:900;color:#0f1f3d;line-height:1.2;"><?php echo $__env->yieldContent('page-title', 'Dashboard'); ?></h1>
             </div>
         </div>
 
@@ -364,12 +366,12 @@
             </div>
 
             <!-- Cart button -->
-            <button onclick="typeof toggleCart !== 'undefined' ? toggleCart() : window.location.href='{{ route('cart.index') }}'"
+            <button onclick="typeof toggleCart !== 'undefined' ? toggleCart() : window.location.href='<?php echo e(route('cart.index')); ?>'"
                id="topbarCartBtn"
                style="position:relative;padding:9px 10px;border-radius:12px;border:1.5px solid #E5E7EB;background:white;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;"
                onmouseover="this.style.borderColor='#2d6a8f';this.style.background='#EFF6FF'" onmouseout="this.style.borderColor='#E5E7EB';this.style.background='white'">
                 <i class="fas fa-shopping-cart text-slate-600 text-sm"></i>
-                @php
+                <?php
                     $topbarCartCount = 0;
                     try {
                         $sessionCart = session('cart', []);
@@ -379,8 +381,8 @@
                             }
                         }
                     } catch(\Exception $e){ $topbarCartCount = 0; }
-                @endphp
-                <span id="topbarCartBadge" style="background:#F97316;color:white;font-size:10px;font-weight:800;padding:1px 6px;border-radius:99px;{{ $topbarCartCount > 0 ? '' : 'display:none;' }}">{{ $topbarCartCount }}</span>
+                ?>
+                <span id="topbarCartBadge" style="background:#F97316;color:white;font-size:10px;font-weight:800;padding:1px 6px;border-radius:99px;<?php echo e($topbarCartCount > 0 ? '' : 'display:none;'); ?>"><?php echo e($topbarCartCount); ?></span>
             </button>
 
             <!-- User chip -->
@@ -388,41 +390,43 @@
                 style="display:flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;background:#F1F5F9;border-radius:12px;border:1.5px solid #E5E7EB;cursor:pointer;transition:all .2s;"
                 onmouseover="this.style.borderColor='#2d6a8f';this.style.background='#EFF6FF'" onmouseout="this.style.borderColor='#E5E7EB';this.style.background='#F1F5F9'">
                 <div id="topbarAvatarArea">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/avatars/'.Auth::user()->avatar) }}" style="width:26px;height:26px;border-radius:8px;object-fit:cover;">
-                    @else
+                    <?php if(Auth::user()->avatar): ?>
+                        <img src="<?php echo e(asset('storage/avatars/'.Auth::user()->avatar)); ?>" style="width:26px;height:26px;border-radius:8px;object-fit:cover;">
+                    <?php else: ?>
                         <div class="avatar" style="width:26px;height:26px;font-size:11px;border-radius:8px;background:linear-gradient(135deg,#2d6a8f,#5B88B2);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            <?php echo e(strtoupper(substr(Auth::user()->name, 0, 1))); ?>
+
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
-                <span style="font-size:13px;font-weight:700;color:#1e293b;">{{ explode(' ', Auth::user()->name)[0] }}</span>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;"><?php echo e(explode(' ', Auth::user()->name)[0]); ?></span>
                 <i class="fas fa-chevron-down text-slate-400" style="font-size:9px;"></i>
             </div>
 
-        </div>{{-- end right flex --}}
+        </div>
     </header>
 
-    {{-- Floating "Kembali ke Dashboard" button untuk admin & ibu kantin yang lagi lihat sebagai pembeli --}}
-    @if(Auth::check() && in_array(Auth::user()->role, ['admin', 'ibu_kantin']) && session('viewing_as_buyer'))
+    
+    <?php if(Auth::check() && in_array(Auth::user()->role, ['admin', 'ibu_kantin']) && session('viewing_as_buyer')): ?>
     <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;">
-        <form action="{{ route('switch.view') }}" method="POST">
-            @csrf
+        <form action="<?php echo e(route('switch.view')); ?>" method="POST">
+            <?php echo csrf_field(); ?>
             <input type="hidden" name="target" value="original">
             <button type="submit"
                 style="background:linear-gradient(135deg,#1a3a5c,#2d6a8f);color:white;font-weight:900;font-size:13px;padding:12px 24px;border-radius:99px;border:none;cursor:pointer;box-shadow:0 8px 32px rgba(45,106,143,0.45);display:flex;align-items:center;gap:10px;white-space:nowrap;"
                 onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
                 <i class="fas fa-arrow-left"></i>
-                Kembali ke Dashboard {{ Auth::user()->role === 'admin' ? 'Admin' : 'Mitra Kantin' }}
-                <span style="background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:99px;font-size:11px;">{{ Auth::user()->role === 'admin' ? '🛡️' : '🍳' }}</span>
+                Kembali ke Dashboard <?php echo e(Auth::user()->role === 'admin' ? 'Admin' : 'Mitra Kantin'); ?>
+
+                <span style="background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:99px;font-size:11px;"><?php echo e(Auth::user()->role === 'admin' ? '🛡️' : '🍳'); ?></span>
             </button>
         </form>
     </div>
-    @endif
+    <?php endif; ?>
     </header>
 
     <main class="page-content">
-        @yield('content')
+        <?php echo $__env->yieldContent('content'); ?>
     </main>
 </div>
 
@@ -762,6 +766,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     </script>
-@yield('extra-js')
+<?php echo $__env->yieldContent('extra-js'); ?>
 </body>
 </html>
+<?php /**PATH D:\Project Web\Web Food-TYU\hulahup-localhost\resources\views/layouts/pembeli.blade.php ENDPATH**/ ?>

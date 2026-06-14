@@ -20,7 +20,70 @@ Route::get('/up', function () {
 
 // 1. Halaman LANDING PAGE (Welcome) - Ini pintu masuk utama
 Route::get('/', function () {
-    return view('welcome');
+    // Stats realtime dari DB
+    $activeCanteenCount = \App\Models\Canteen::whereIn('status', ['buka', 'active', 'open'])->count();
+    $totalCanteenCount  = \App\Models\Canteen::count();
+    $totalMenuCount     = \App\Models\Menu::where('is_available', true)->count();
+
+    // Menu paling laris: ambil semua completed orders, parse items JSON, hitung frekuensi per menu_id
+    $orders = \App\Models\Order::whereIn('status', ['completed', 'selesai', 'siap_diambil'])
+        ->pluck('items');
+
+    $menuSales = [];
+    foreach ($orders as $items) {
+        $itemsArr = is_array($items) ? $items : (json_decode($items, true) ?: []);
+        foreach ($itemsArr as $item) {
+            $mid = $item['menu_id'] ?? $item['id'] ?? null;
+            if ($mid) {
+                $menuSales[$mid] = ($menuSales[$mid] ?? 0) + ($item['quantity'] ?? $item['qty'] ?? 1);
+            }
+        }
+    }
+    arsort($menuSales);
+    $topMenuIds = array_keys(array_slice($menuSales, 0, 6, true));
+
+    // Ambil menu terlaris dari DB (dengan gambar & kantin)
+    if (!empty($topMenuIds)) {
+        $trendingMenus = \App\Models\Menu::whereIn('id', $topMenuIds)
+            ->where('is_available', true)
+            ->with('canteen')
+            ->get()
+            ->sortBy(fn($m) => array_search($m->id, $topMenuIds))
+            ->values();
+        // Tambahkan sold_count ke setiap menu
+        $trendingMenus = $trendingMenus->map(function($m) use ($menuSales) {
+            $m->sold_count = $menuSales[$m->id] ?? 0;
+            return $m;
+        });
+    } else {
+        // Fallback: ambil menu random jika belum ada order
+        $trendingMenus = \App\Models\Menu::where('is_available', true)
+            ->with('canteen')
+            ->inRandomOrder()
+            ->take(6)
+            ->get()
+            ->map(function($m) { $m->sold_count = 0; return $m; });
+    }
+
+    // Canteens untuk section kantin
+    $canteens = \App\Models\Canteen::withCount(['menus' => fn($q) => $q->where('is_available', true)])
+        ->take(3)
+        ->get();
+
+    // Latest order untuk live ticker
+    $latestOrder = \App\Models\Order::with(['user', 'canteen'])
+        ->latest()
+        ->first();
+
+    return view('welcome', compact(
+        'activeCanteenCount',
+        'totalCanteenCount',
+        'totalMenuCount',
+        'trendingMenus',
+        'canteens',
+        'latestOrder',
+        'menuSales'
+    ));
 })->name('welcome');
 
 // 2. Halaman Login
@@ -85,6 +148,45 @@ Route::post('/switch-view', [AuthController::class, 'switchView'])->middleware('
 // 6B. Order Routes (API endpoints)
 Route::post('/api/orders', [OrderController::class, 'store'])->middleware('auth')->name('orders.store');
 Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->middleware('auth')->name('orders.reorder');
+
+// 6B2. Voucher Validation API (untuk pembeli cek kode promo)
+Route::post('/api/voucher/check', function (\Illuminate\Http\Request $request) {
+    $code = strtoupper(trim($request->input('code', '')));
+
+    if (!$code) {
+        return response()->json(['valid' => false, 'message' => 'Kode voucher tidak boleh kosong.']);
+    }
+
+    $voucher = \App\Models\Voucher::where('code', $code)
+        ->where(function($q) {
+            $q->whereNull('valid_from')->orWhere('valid_from', '<=', now());
+        })
+        ->where(function($q) {
+            $q->whereNull('valid_to')->orWhere('valid_to', '>=', now());
+        })
+        ->first();
+
+    if (!$voucher) {
+        return response()->json(['valid' => false, 'message' => 'Kode voucher tidak ditemukan atau sudah tidak berlaku.']);
+    }
+
+    if ($voucher->max_uses !== null && $voucher->times_used >= $voucher->max_uses) {
+        return response()->json(['valid' => false, 'message' => 'Voucher ini sudah mencapai batas penggunaan.']);
+    }
+
+    return response()->json([
+        'valid'               => true,
+        'code'                => $voucher->code,
+        'description'         => $voucher->description,
+        'discount_percentage' => $voucher->discount_percentage,
+        'discount_amount'     => $voucher->discount_amount,
+        'valid_to'            => $voucher->valid_to ? $voucher->valid_to->format('d M Y H:i') : null,
+        'canteen_name'        => $voucher->canteen ? $voucher->canteen->name : null,
+    ]);
+})->middleware('auth')->name('api.voucher.check');
+
+// 6B3. Chatbot Gemini API Route
+Route::post('/api/chatbot/chat', [\App\Http\Controllers\ChatbotController::class, 'chat'])->middleware('auth')->name('api.chatbot.chat');
 
 // 6C-notif. Notification API
 Route::get('/api/notifications', function () {
@@ -201,6 +303,9 @@ Route::middleware(['auth', 'checkRole:ibu_kantin'])->prefix('canteen')->group(fu
     Route::get('/export', [CanteenController::class, 'exportIndex'])->name('canteen.export');
     Route::get('/export/orders', [CanteenController::class, 'exportOrders'])->name('canteen.export.orders');
     Route::get('/export/menus', [CanteenController::class, 'exportMenus'])->name('canteen.export.menus');
+    Route::get('/export/orders-pdf', [CanteenController::class, 'printOrders'])->name('canteen.export.orders.pdf');
+    Route::get('/export/menus-pdf', [CanteenController::class, 'printMenus'])->name('canteen.export.menus.pdf');
+    Route::get('/api/notifications', [CanteenController::class, 'apiNotifications'])->name('canteen.api.notifications');
 });
 
 // 7. Halaman Lainnya

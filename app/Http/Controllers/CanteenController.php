@@ -310,17 +310,24 @@ class CanteenController extends Controller
             'description' => 'nullable|string',
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric|min:0',
-            'valid_from' => 'required|date_format:Y-m-d H:i',
-            'valid_to' => 'required|date_format:Y-m-d H:i|after:valid_from',
-            'max_uses' => 'required|integer|min:1',
+            'valid_from' => 'required|date',
+            'valid_to' => 'required|date|after:valid_from',
+            'max_uses' => 'nullable|integer|min:1',
         ]);
+
+        // Konversi format tanggal dari datetime-local (ISO) ke format database
+        $validated['valid_from'] = date('Y-m-d H:i:s', strtotime($validated['valid_from']));
+        $validated['valid_to']   = date('Y-m-d H:i:s', strtotime($validated['valid_to']));
+
+        // Default ke 999999 jika kosong (tanpa limit)
+        $validated['max_uses'] = $validated['max_uses'] ?? 999999;
 
         Voucher::create([
             'canteen_id' => $canteen->id,
             ...$validated,
         ]);
 
-        return redirect('/canteen/vouchers')->with('success', 'Voucher berhasil dibuat');
+        return redirect('/canteen/vouchers')->with('success', 'Voucher berhasil dibuat! 🎉');
     }
 
     /**
@@ -355,14 +362,21 @@ class CanteenController extends Controller
             'description' => 'nullable|string',
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric|min:0',
-            'valid_from' => 'required|date_format:Y-m-d H:i',
-            'valid_to' => 'required|date_format:Y-m-d H:i|after:valid_from',
-            'max_uses' => 'required|integer|min:1',
+            'valid_from' => 'required|date',
+            'valid_to' => 'required|date|after:valid_from',
+            'max_uses' => 'nullable|integer|min:1',
         ]);
+
+        // Konversi format tanggal dari datetime-local (ISO) ke format database
+        $validated['valid_from'] = date('Y-m-d H:i:s', strtotime($validated['valid_from']));
+        $validated['valid_to']   = date('Y-m-d H:i:s', strtotime($validated['valid_to']));
+
+        // Default ke 999999 jika kosong (tanpa limit)
+        $validated['max_uses'] = $validated['max_uses'] ?? 999999;
 
         $voucher->update($validated);
 
-        return redirect('/canteen/vouchers')->with('success', 'Voucher berhasil diupdate');
+        return redirect('/canteen/vouchers')->with('success', 'Voucher berhasil diupdate! ✅');
     }
 
     /**
@@ -675,5 +689,147 @@ class CanteenController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * View sales report print layout (for saving to PDF)
+     */
+    public function printOrders(Request $request)
+    {
+        $user = auth()->user();
+        $canteen = $user->canteen;
+
+        if (!$canteen) {
+            return redirect('/canteen/create');
+        }
+
+        $query = $canteen->orders()->with('user')->latest();
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $orders = $query->get();
+        
+        // Hitung ringkasan statistik
+        $totalOrders = $orders->count();
+        $totalRevenue = $orders->where('status', 'completed')->sum('total_amount');
+        $totalDiscount = $orders->sum('discount_amount');
+        
+        // Hitung berdasarkan status
+        $statusCounts = $orders->groupBy('status')->map(fn($group) => $group->count());
+
+        return view('canteen.print_orders', compact(
+            'canteen', 
+            'orders', 
+            'totalOrders', 
+            'totalRevenue', 
+            'totalDiscount', 
+            'statusCounts',
+            'request'
+        ));
+    }
+
+    /**
+     * View menus performance report print layout (for saving to PDF)
+     */
+    public function printMenus(Request $request)
+    {
+        $user = auth()->user();
+        $canteen = $user->canteen;
+
+        if (!$canteen) {
+            return redirect('/canteen/create');
+        }
+
+        $menus = $canteen->menus()->get();
+        
+        $menuReport = [];
+        $totalPorsiSold = 0;
+        $totalCanteenOmset = 0;
+
+        foreach ($menus as $menu) {
+            $salesData = \Illuminate\Support\Facades\DB::table('order_items')
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->where('order_items.menu_id', $menu->id)
+                ->where('orders.status', 'completed')
+                ->select(
+                    \Illuminate\Support\Facades\DB::raw('SUM(order_items.quantity) as total_qty'),
+                    \Illuminate\Support\Facades\DB::raw('SUM(order_items.quantity * order_items.price) as total_revenue')
+                )
+                ->first();
+
+            $qty = $salesData->total_qty ?? 0;
+            $revenue = $salesData->total_revenue ?? 0;
+            
+            $totalPorsiSold += $qty;
+            $totalCanteenOmset += $revenue;
+
+            $menuReport[] = [
+                'name' => $menu->name,
+                'category' => $menu->category,
+                'price' => $menu->price,
+                'is_available' => $menu->is_available,
+                'total_qty' => $qty,
+                'total_revenue' => $revenue
+            ];
+        }
+
+        // Urutkan berdasarkan yang terlaris (total porsi terbanyak)
+        usort($menuReport, function($a, $b) {
+            return $b['total_qty'] <=> $a['total_qty'];
+        });
+
+        return view('canteen.print_menus', compact(
+            'canteen', 
+            'menuReport', 
+            'totalPorsiSold', 
+            'totalCanteenOmset'
+        ));
+    }
+
+    /**
+     * API for real-time notifications on new orders (canteen area)
+     */
+    public function apiNotifications()
+    {
+        $user = auth()->user();
+        $canteen = $user->canteen;
+        if (!$canteen) {
+            return response()->json(['success' => false, 'message' => 'No canteen found']);
+        }
+        
+        $pendingOrders = \App\Models\Order::where('canteen_id', $canteen->id)
+            ->where('status', 'pending')
+            ->with('user')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $latestPending = $pendingOrders->first();
+
+        // Ambil 5 pesanan pending terbaru untuk dirender di dropdown topbar
+        $ordersList = $pendingOrders->take(5)->map(function($o) {
+            return [
+                'id' => $o->id,
+                'order_number' => $o->order_number,
+                'buyer_name' => $o->user->name ?? 'Pembeli',
+                'amount' => 'Rp ' . number_format($o->total_amount, 0, ',', '.'),
+                'time' => $o->created_at->diffForHumans(),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'pending_count' => $pendingOrders->count(),
+            'latest_pending_id' => $latestPending ? $latestPending->id : null,
+            'latest_pending_number' => $latestPending ? $latestPending->order_number : null,
+            'latest_pending_buyer' => $latestPending ? ($latestPending->user->name ?? 'Pembeli') : null,
+            'latest_pending_time' => $latestPending ? $latestPending->created_at->diffForHumans() : null,
+            'orders_list' => $ordersList,
+        ]);
     }
 }

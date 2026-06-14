@@ -56,7 +56,7 @@
                     <div style="border-top:2px dashed #F1F5F9;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
                         <div>
                             <p style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;">Terpakai</p>
-                            <p style="font-size:15px;font-weight:800;color:#1e293b;">{{ $voucher->times_used }}<span style="color:#94A3B8;font-weight:500;">/{{ $voucher->max_uses }}</span></p>
+                            <p style="font-size:15px;font-weight:800;color:#1e293b;">{{ $voucher->times_used }}<span style="color:#94A3B8;font-weight:500;">/{{ $voucher->max_uses >= 999999 ? '∞' : $voucher->max_uses }}</span></p>
                         </div>
                         <div style="text-align:right;">
                             <p style="font-size:10px;color:#94A3B8;font-weight:700;text-transform:uppercase;">Berlaku s/d</p>
